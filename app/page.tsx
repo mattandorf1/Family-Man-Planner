@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "../../lib/supabase/client";
 import PlannerApp from "@/components/PlannerApp";
 
 export default async function Home() {
