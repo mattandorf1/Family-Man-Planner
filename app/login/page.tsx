@@ -1,24 +1,37 @@
 "use client";
 
 import { useState } from "react";
-   import { createClient } from "../../lib/supabase/client";
+import { createClient } from "../../lib/supabase/client";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
+  const [code, setCode] = useState("");
+  const [stage, setStage] = useState<"email" | "code">("email");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSend = async () => {
     setError("");
+    setLoading(true);
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+    const { error } = await supabase.auth.signInWithOtp({ email });
+    setLoading(false);
     if (error) setError(error.message);
-    else setSent(true);
+    else setStage("code");
+  };
+
+  const handleVerify = async () => {
+    setError("");
+    setLoading(true);
+    const supabase = createClient();
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token: code,
+      type: "email",
+    });
+    setLoading(false);
+    if (error) setError(error.message);
+    else window.location.href = "/";
   };
 
   return (
@@ -29,11 +42,7 @@ export default function LoginPage() {
           Sign in to your planner
         </h1>
 
-        {sent ? (
-          <div className="text-white text-sm bg-white/10 rounded-lg p-4">
-            Check <b>{email}</b> for a sign-in link.
-          </div>
-        ) : (
+        {stage === "email" && (
           <>
             <input
               type="email"
@@ -44,14 +53,38 @@ export default function LoginPage() {
             />
             <button
               onClick={handleSend}
-              disabled={!email}
+              disabled={!email || loading}
               className="w-full py-3 rounded-lg bg-rust text-white font-semibold text-sm disabled:opacity-50"
             >
-              Send sign-in link
+              {loading ? "Sending…" : "Send code"}
             </button>
-            {error && <div className="text-red-300 text-xs mt-3">{error}</div>}
           </>
         )}
+
+        {stage === "code" && (
+          <>
+            <div className="text-white text-sm bg-white/10 rounded-lg p-4 mb-4">
+              We sent a 6-digit code to <b>{email}</b>. Enter it below.
+            </div>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="123456"
+              className="w-full px-4 py-3 rounded-lg mb-3 outline-none text-sm text-center tracking-widest text-lg"
+            />
+            <button
+              onClick={handleVerify}
+              disabled={!code || loading}
+              className="w-full py-3 rounded-lg bg-rust text-white font-semibold text-sm disabled:opacity-50"
+            >
+              {loading ? "Checking…" : "Verify & sign in"}
+            </button>
+          </>
+        )}
+
+        {error && <div className="text-red-300 text-xs mt-3">{error}</div>}
       </div>
     </div>
   );
