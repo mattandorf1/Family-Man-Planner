@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
-import { createClient } from "../../lib/supabase/client";
-import PlannerApp from "@/components/PlannerApp";
+import { createClient } from "../lib/supabase/server";
+import PlannerApp from "../components/PlannerApp";
 
 export default async function Home() {
   const supabase = createClient();
