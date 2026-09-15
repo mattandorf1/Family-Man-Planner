@@ -56,7 +56,7 @@ Supabase dashboard → **Authentication** → **Providers** → make sure **Emai
 
 ## 5. One last Supabase setting
 
-Supabase dashboard → **Authentication** → **URL Configuration** → set
+Supabase dashboard → **Authentication** → **URL Configuration** → set 
 **Site URL** to your live Vercel URL (e.g. `https://family-man-planner.vercel.app`).
 This makes the magic-link emails redirect back to the live app instead of localhost.
 
